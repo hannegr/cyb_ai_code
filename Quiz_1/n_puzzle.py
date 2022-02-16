@@ -17,10 +17,9 @@ class NPuzzle:
                      size=3 - 8-puzzle; 4 - 15 puzzle
         '''
         self.size = size 
-        self.puzzle_list = [i for i in range (1,size)]
+        self.puzzle_list = [i for i in range (1,size**2)]
         self.puzzle_list.append(None)
         self.splitted_list = []
-        self.split_size = int(np.sqrt(self.size))
         
  
     def reset(self):
@@ -43,7 +42,7 @@ class NPuzzle:
             random.shuffle(self.puzzle_list)
         
     def is_solvable(self): 
-        if(self.split_size%2): 
+        if(self.size%2): 
             if(self.odd_inversions()): 
                 return False
         else: 
@@ -67,7 +66,7 @@ class NPuzzle:
         '''
         
         splitted_list = self.puzzle_list.copy()
-        self.splitted_list = [splitted_list[i:i + self.split_size] for i in range(0, len(splitted_list), self.split_size)]
+        self.splitted_list = [splitted_list[i:i + self.size] for i in range(0, len(splitted_list), self.size)]
         inversions = 0
         in_front_of_current_row = False 
         for i in self.puzzle_list: 
