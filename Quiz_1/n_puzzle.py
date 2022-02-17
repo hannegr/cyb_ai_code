@@ -102,8 +102,8 @@ class NPuzzle:
         The function raises IndexError exception if outside the board
         '''
         try:
-            print(self.splitted_list[row][col])
+            return(self.splitted_list[row][col])
             
         except IndexError as e:
-            print(e)
+            return(e)
 
