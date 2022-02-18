@@ -1,6 +1,5 @@
 import numpy as np
 import random
-import  copy
 
 class NPuzzle:
     '''
@@ -38,17 +37,8 @@ class NPuzzle:
         '''
         self.splitted_list = []
         random.shuffle(self.puzzle_list) 
-        while(not self.is_solvable()): 
-            random.shuffle(self.puzzle_list)
         
-    def is_solvable(self): 
-        if(self.size%2): 
-            if(self.odd_inversions()): 
-                return False
-        else: 
-            if((not self.odd_inversions() and not self.odd_tile_placement()) or (self.odd_inversions() and self.odd_tile_placement())): 
-                return False
-        return True
+    
                
     def odd_tile_placement(self): 
         """
@@ -65,8 +55,6 @@ class NPuzzle:
         return true if inversions are odd, false if they are not odd. 
         '''
         
-        splitted_list = self.puzzle_list.copy()
-        self.splitted_list = [splitted_list[i:i + self.size] for i in range(0, len(splitted_list), self.size)]
         inversions = 0
         in_front_of_current_row = False 
         for i in self.puzzle_list: 
@@ -90,6 +78,8 @@ class NPuzzle:
         just print itself to the standard output
         :return: None
         '''
+        splitted_list = self.puzzle_list.copy()
+        self.splitted_list = [splitted_list[i:i + self.size] for i in range(0, len(splitted_list), self.size)]
         for i in range(len(self.splitted_list)): 
             print(self.splitted_list[i])        
  
