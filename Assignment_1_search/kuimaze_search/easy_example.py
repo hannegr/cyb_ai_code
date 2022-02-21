@@ -10,6 +10,7 @@ import time
 import kuimaze
 import os
 import random
+import kuimaze.agent as agen
 
 class Agent(kuimaze.BaseAgent):
     '''
@@ -32,7 +33,7 @@ class Agent(kuimaze.BaseAgent):
         while True:
             new_positions = self.environment.expand(position)         # [[(x1, y1), cost], [(x2, y2), cost], ... ]
             # print(new_positions)
-            print(self.environment.step(position)[0])
+            print(self.environment.step(position)[0][0][0])
             position = random.choice(new_positions)[0]                # select next at random, ignore the cost infor
             #print(position)
             if position == goal:                    # break the loop when the goal position is reached
@@ -44,7 +45,7 @@ class Agent(kuimaze.BaseAgent):
         path = [(4,0),(4,1)]        # create path as list of tuples in format: [(x1, y1), (x2, y2), ... ] 
         return path
 
-
+"""
 if __name__ == '__main__':
 
     MAP = 'maps/easy/easy3.bmp'
@@ -57,6 +58,27 @@ if __name__ == '__main__':
     agent = Agent(env) 
 
     path = agent.find_path()
+    print(path)
+    env.set_path(path)          # set path it should go from the init state to the goal state
+    if SAVE_PATH:
+        env.save_path()         # save path of agent to current directory
+    if SAVE_EPS:
+        env.save_eps()          # save rendered image to eps
+    env.render(mode='human')
+    time.sleep(3)
+"""
+if __name__ == '__main__':
+    
+    MAP = 'maps/easy/easy3.bmp'
+    MAP = os.path.join(os.path.dirname(os.path.abspath(__file__)), MAP)
+    GRAD = (0, 0)
+    SAVE_PATH = False
+    SAVE_EPS = False
+
+    env = kuimaze.InfEasyMaze(map_image=None, grad=GRAD)       # For using random map set: map_image=None
+    agent = agen.Agent(env) 
+
+    path = agent.a_algorithm()
     print(path)
     env.set_path(path)          # set path it should go from the init state to the goal state
     if SAVE_PATH:

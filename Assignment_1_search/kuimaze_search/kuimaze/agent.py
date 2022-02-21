@@ -35,15 +35,40 @@ class Agent(BaseAgent):
         path = [(4,0),(4,1)]        # create path as list of tuples in format: [(x1, y1), (x2, y2), ... ] 
         return path
     
-    def heuristic_distance(self, position, goal, D): 
-        dx = abs(position.x - goal.x)
-        dy = abs(position.y - goal.y)
-        return D * (dx + dy)
+    def _h_score(self, position, goal): 
+        """
+        Chooses the normal bla bla as my heuristic distance, because of how the maze looks like. 
+        """
+        dx = abs(position[0] - goal[0])
+        dy = abs(position[1] - goal[1])
+        return (dx + dy) 
+    
+    def _f_score(self, position, goal, positions, finished_nodes): 
+        """
+        Sum of heuristic score and cost 
+        """
+        for position_index in positions: 
+            
     
     
     def a_algorithm(self):
-        observation = self.environment.reset()
+        '''
+        Implemented A* algorithm 
+        '''
+        observation = self.environment.reset() #returns start position and goal position
         goal = observation[1][0:2]
-        position = observation[0][0:2]   
+        position = observation[0][0:2]  
+        finished_nodes = []
+        current_nodes = [position]
+        potential_nodes = []
+        #print('Starting random searching') 
+        while True: 
+            positions_with_cost = self.environment.expand(position)
+            #må i tillegg adde heuristic distance på en eller annen måte. 
+            print(positions_with_cost)
+            print(self._heuristic_distance(position, goal))
+            break
+            
+        
         
         
