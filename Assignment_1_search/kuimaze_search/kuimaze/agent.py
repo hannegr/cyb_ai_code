@@ -43,11 +43,21 @@ class Agent(BaseAgent):
         dy = abs(position[1] - goal[1])
         return (dx + dy) 
     
-    def _f_score(self, position, goal, positions, finished_nodes): 
+    def _f_score(self, goal, positions): #, finished_nodes): 
         """
         Sum of heuristic score and cost 
         """
-        for position_index in positions: 
+        a = None
+        f_score = 0
+        for position in positions: 
+            pos_h_score = self._h_score(position[0], goal)
+            pos_cost = position[1]
+            pot_f_score = pos_h_score + pos_cost
+            if(pot_f_score > f_score): 
+                f_score = pot_f_score
+                a =[position, f_score]
+                
+        return a            
             
     
     
@@ -57,17 +67,43 @@ class Agent(BaseAgent):
         '''
         observation = self.environment.reset() #returns start position and goal position
         goal = observation[1][0:2]
-        position = observation[0][0:2]  
-        finished_nodes = []
-        current_nodes = [position]
-        potential_nodes = []
-        #print('Starting random searching') 
-        while True: 
-            positions_with_cost = self.environment.expand(position)
-            #må i tillegg adde heuristic distance på en eller annen måte. 
-            print(positions_with_cost)
-            print(self._heuristic_distance(position, goal))
+        q = observation[0][0:2] 
+        q = [q, self._h_score(q, goal)]
+        
+        print("goal: ", goal) 
+        print("position: ", q)
+        open_set = [q]
+        closed_set = []
+        children_and_parents = {} 
+        while open_set: 
+            #finn noden med lavest f i list, kall den q 
+            min_f_score_index = open_set.index(min(open_set))
+            q = open_set[min_f_score_index]
+            del open_set[min_f_score_index]
+            q_successors = self.environment.expand(q[0])
+            children_and_parents[q[0][0]] = q_successors
+            best_child = self._f_score(goal, q_successors)
+            print(best_child)
+            #open_set.append(best_child)
+            #closed_set.append(q)
+            #print(open_set)
+            #print(closed_set)
+            
+                  
+            """                           
             break
+            if init_position in open_set: 
+                q = init_position
+                q_successors = self.environment.expand(q)
+                q_successors_f_score = self._f_score(goal, q_successors)
+                children_and_parents[q] = q_successors
+            else: 
+                max_f_score_index = open_set.index(max(open_set))
+                q = open_set[max_f_score_index]
+                del open_set[max_f_score_index]
+                q_successors = self.environment.expand(q[0])
+                children_and_parents[q[0][0]] = q_successors
+            """
             
         
         
