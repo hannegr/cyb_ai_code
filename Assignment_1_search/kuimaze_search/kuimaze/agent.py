@@ -57,7 +57,23 @@ class Agent(BaseAgent):
                 f_score = pot_f_score
                 a =[position, f_score]
                 
-        return a            
+        return a    
+    
+    def _new_f_score(self, goal, positions):
+        f_score_list = []
+        for position in positions: 
+            pos_h_score = self._h_score(position[0], goal)
+            pos_cost = position[1]
+            pos_f_score = pos_h_score + pos_cost
+            f_score_list.append([position, pos_f_score])
+        return f_score_list 
+    
+    def find_minimum_in_list(open_list, successor_place): 
+        same_place_successors = []
+        for successor in open_list: 
+            if successor_place in successor: 
+                same_place_successors.append(successor)
+        return min(same_place_successors)
             
     
     
@@ -66,24 +82,40 @@ class Agent(BaseAgent):
         Implemented A* algorithm 
         '''
         observation = self.environment.reset() #returns start position and goal position
-        goal = observation[1][0:2]
-        q = observation[0][0:2] 
-        q = [q, self._h_score(q, goal)]
+        goal = observation[1][0:2] #goal position
+        q = observation[0][0:2] #start position
+        q = [[q], self._h_score(q, goal)]
         
-        print("goal: ", goal) 
-        print("position: ", q)
+        #print("goal: ", goal) 
+        #print("position: ", q)
         open_set = [q]
         closed_set = []
         children_and_parents = {} 
         while open_set: 
             #finn noden med lavest f i list, kall den q 
             min_f_score_index = open_set.index(min(open_set))
+            #print("open set: ", open_set)
             q = open_set[min_f_score_index]
             del open_set[min_f_score_index]
-            q_successors = self.environment.expand(q[0])
-            children_and_parents[q[0][0]] = q_successors
-            best_child = self._f_score(goal, q_successors)
-            print(best_child)
+            closed_set.append(q)
+            if(q[0][0] == goal): 
+                return
+            else: 
+                q_successors = self.environment.expand(q[0][0])
+                children_and_parents[q[0][0]] = q_successors
+                best_child = self._f_score(goal, q_successors)
+                successors_with_f_values = self._new_f_score(goal, q_successors)
+                break
+                
+                for successor in successors_with_f_values: 
+                    if(successor not in closed_set): 
+                        return
+        
+                         
+                
+            #print("q: ", q[0])
+            
+            #print("best child: ",best_child)
             #open_set.append(best_child)
             #closed_set.append(q)
             #print(open_set)

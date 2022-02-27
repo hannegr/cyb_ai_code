@@ -11,6 +11,8 @@ import kuimaze
 import os
 import random
 import kuimaze.agent as agen
+import numpy as np 
+import collections
 
 class Agent(kuimaze.BaseAgent):
     '''
@@ -68,6 +70,8 @@ if __name__ == '__main__':
     time.sleep(3)
 """
 if __name__ == '__main__':
+    
+
     
     MAP = 'maps/easy/easy3.bmp'
     MAP = os.path.join(os.path.dirname(os.path.abspath(__file__)), MAP)
