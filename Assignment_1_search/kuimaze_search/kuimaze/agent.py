@@ -11,6 +11,7 @@ class Agent(BaseAgent):
     '''
     def __init__(self, environment, distance_matrix=None):
         self.environment = environment
+        self.children_and_parents = {}
 
     def find_path(self):
         '''
@@ -41,25 +42,9 @@ class Agent(BaseAgent):
         """
         dx = abs(position[0] - goal[0])
         dy = abs(position[1] - goal[1])
-        return (dx + dy) 
+        return (dx + dy)    
     
-    def _f_score(self, goal, positions): #, finished_nodes): 
-        """
-        Sum of heuristic score and cost 
-        """
-        a = None
-        f_score = 0
-        for position in positions: 
-            pos_h_score = self._h_score(position[0], goal)
-            pos_cost = position[1]
-            pot_f_score = pos_h_score + pos_cost
-            if(pot_f_score > f_score): 
-                f_score = pot_f_score
-                a =[position, f_score]
-                
-        return a    
-    
-    def _new_f_score(self, goal, positions):
+    def _f_score(self, goal, positions):
         f_score_list = []
         for position in positions: 
             pos_h_score = self._h_score(position[0], goal)
@@ -67,14 +52,6 @@ class Agent(BaseAgent):
             pos_f_score = pos_h_score + pos_cost
             f_score_list.append([position, pos_f_score])
         return f_score_list 
-    
-    def find_minimum_in_list(open_list, successor_place): 
-        same_place_successors = []
-        for successor in open_list: 
-            if successor_place in successor: 
-                same_place_successors.append(successor)
-        return min(same_place_successors)
-            
     
     
     def a_algorithm(self):
@@ -85,58 +62,31 @@ class Agent(BaseAgent):
         goal = observation[1][0:2] #goal position
         q = observation[0][0:2] #start position
         q = [[q], self._h_score(q, goal)]
+        test = []
         
         #print("goal: ", goal) 
         #print("position: ", q)
-        open_set = [q]
-        closed_set = []
-        children_and_parents = {} 
-        while open_set: 
-            #finn noden med lavest f i list, kall den q 
-            min_f_score_index = open_set.index(min(open_set))
-            #print("open set: ", open_set)
-            q = open_set[min_f_score_index]
-            del open_set[min_f_score_index]
-            closed_set.append(q)
+        frontier_list = [q]
+        explored_set = set()
+         
+        while frontier_list: 
+            frontier_list.sort(reverse=True)
+            
+            q = frontier_list.pop() 
+            if(q[0][0] in test): 
+                test.remove(q[0][0])
+                test.append(q[0][0])
+            else: 
+                test.append(q[0][0])
+            explored_set.add(q[0][0])
             if(q[0][0] == goal): 
-                return
+                print("done!")
+                return test
             else: 
                 q_successors = self.environment.expand(q[0][0])
-                children_and_parents[q[0][0]] = q_successors
-                best_child = self._f_score(goal, q_successors)
-                successors_with_f_values = self._new_f_score(goal, q_successors)
-                break
-                
+                self.children_and_parents[q[0][0]] = q_successors
+                successors_with_f_values = self._f_score(goal, q_successors)
                 for successor in successors_with_f_values: 
-                    if(successor not in closed_set): 
-                        return
-        
-                         
-                
-            #print("q: ", q[0])
-            
-            #print("best child: ",best_child)
-            #open_set.append(best_child)
-            #closed_set.append(q)
-            #print(open_set)
-            #print(closed_set)
-            
-                  
-            """                           
-            break
-            if init_position in open_set: 
-                q = init_position
-                q_successors = self.environment.expand(q)
-                q_successors_f_score = self._f_score(goal, q_successors)
-                children_and_parents[q] = q_successors
-            else: 
-                max_f_score_index = open_set.index(max(open_set))
-                q = open_set[max_f_score_index]
-                del open_set[max_f_score_index]
-                q_successors = self.environment.expand(q[0])
-                children_and_parents[q[0][0]] = q_successors
-            """
-            
-        
-        
-        
+                    if(successor[0][0] not in explored_set): 
+                        frontier_list.append(successor)
+                        
