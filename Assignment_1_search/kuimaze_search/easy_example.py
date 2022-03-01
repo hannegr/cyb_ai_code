@@ -83,6 +83,7 @@ if __name__ == '__main__':
     agent = agen.Agent(env) 
 
     path = agent.a_algorithm()
+    time.sleep(3)
     print(path)
     env.set_path(path)          # set path it should go from the init state to the goal state
     if SAVE_PATH:

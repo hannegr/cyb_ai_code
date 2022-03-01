@@ -11,7 +11,6 @@ class Agent(BaseAgent):
     '''
     def __init__(self, environment, distance_matrix=None):
         self.environment = environment
-        self.children_and_parents = {}
 
     def find_path(self):
         '''
@@ -53,17 +52,36 @@ class Agent(BaseAgent):
             f_score_list.append([position, pos_f_score])
         return f_score_list 
     
+            
+    def _smallest_f_value(self, frontier_list, successor_place): 
+        same_place_successors = [successor_place]
+        for successor in frontier_list: 
+            if successor_place[0][0] in successor: 
+                same_place_successors.append(successor)
+        if min(same_place_successors) != successor_place: 
+            return False
+        return True
+            
+        
+    
     
     def a_algorithm(self):
         '''
-        Implemented A* algorithm 
+        Implemented A* algorithm. Contains 
+        - frontier_list: list showing the neighbournodes that may be expanded if the cost is minimal. 
+        - closed_set: a set s.t the values are not repeated. Includes every node that is finished. 
+        - predecessor_dictionary: a dictionary containing predecessor of nodes, used for returning the shortest path. 
+          Chose to do this, due to what was written on the wikipedia-page of the A* algorithm about it returning the 
+          shortest path, but not the way to get there. 
+        
+        Returns: list of the shortest path from start node to goal node. 
         '''
         observation = self.environment.reset() #returns start position and goal position
         goal = observation[1][0:2] #goal position
-        q = observation[0][0:2] #start position
-        q = [[q], self._h_score(q, goal)]
-        test = []
-        
+        start_pos = observation[0][0:2] #start position
+        q = [[start_pos], self._h_score(start_pos, goal)]
+        predecessor_dictionary = {}    
+        path_list = []    
         #print("goal: ", goal) 
         #print("position: ", q)
         frontier_list = [q]
@@ -71,22 +89,21 @@ class Agent(BaseAgent):
          
         while frontier_list: 
             frontier_list.sort(reverse=True)
-            
             q = frontier_list.pop() 
-            if(q[0][0] in test): 
-                test.remove(q[0][0])
-                test.append(q[0][0])
-            else: 
-                test.append(q[0][0])
             explored_set.add(q[0][0])
             if(q[0][0] == goal): 
                 print("done!")
-                return test
+                path_node = start_pos
+                while goal not in path_list: 
+                    path_list.append(path_node)
+                    path_node = predecessor_dictionary.get(path_node)
+                return path_list
             else: 
                 q_successors = self.environment.expand(q[0][0])
-                self.children_and_parents[q[0][0]] = q_successors
+                
                 successors_with_f_values = self._f_score(goal, q_successors)
                 for successor in successors_with_f_values: 
-                    if(successor[0][0] not in explored_set): 
+                    if(successor[0][0] not in explored_set and self._smallest_f_value(frontier_list, successor)): 
                         frontier_list.append(successor)
+                        predecessor_dictionary[q[0][0]] = successor[0][0]
                         
