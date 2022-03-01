@@ -69,8 +69,8 @@ class Agent(BaseAgent):
         '''
         observation = self.environment.reset() #returns start position and goal position
         goal = observation[1][0:2] #goal position
-        start_pos = observation[0][0:2] #start position
-        q = [[start_pos, 0], self._h_score(start_pos, goal)]
+        start_node = observation[0][0:2] #start position
+        q = [[start_node, 0], self._h_score(start_node, goal)]
         predecessor_dictionary = {}    
         path_list = []    
         frontier_list = [q]
@@ -80,25 +80,23 @@ class Agent(BaseAgent):
             frontier_list.sort(reverse=True)
             q = frontier_list.pop() 
             explored_set.add(q[0][0])
-            if(q[0][0] == goal): #goal was found, can therefore go out of the loop 
-                break  
-            else: 
-                q_successors = self.environment.expand(q[0][0])  
-                successors_with_f_values = self._f_score(goal, q_successors, q)
-                for successor in successors_with_f_values: 
-                    if(successor[0][0] not in explored_set and self._smallest_f_value(frontier_list, successor)): 
-                        frontier_list.append(successor)
-                        predecessor_dictionary[q[0][0]] = successor[0][0]
-                        if(successor[0][0] == goal): #goal was found, can therefore go out of the loop
-                            break
-                        
-            #self.environment.render()               # show enviroment's GUI       DO NOT FORGET TO COMMENT THIS LINE BEFORE FINAL SUBMISSION!      
-            #time.sleep(0.1)
+            #if(q[0][0] == goal): #goal was found, can therefore go out of the loop 
+            #    break  
+            #else: 
+            q_successors = self.environment.expand(q[0][0])  
+            successors_with_f_values = self._f_score(goal, q_successors, q)
+            for successor in successors_with_f_values: 
+                if(successor[0][0] not in explored_set and self._smallest_f_value(frontier_list, successor)): 
+                    frontier_list.append(successor)
+                    predecessor_dictionary[q[0][0]] = successor[0][0]
+                    if(successor[0][0] == goal): #goal was found, can therefore go out of the loop
+                        break
         if goal not in predecessor_dictionary.values(): 
             return None
-        path_node = start_pos
+        path_node = start_node
         while goal not in path_list: 
+            if path_node == None: 
+                return None
             path_list.append(path_node)
             path_node = predecessor_dictionary.get(path_node)
-            print(path_list)
         return path_list

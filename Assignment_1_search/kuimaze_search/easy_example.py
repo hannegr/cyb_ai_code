@@ -41,8 +41,8 @@ class Agent(kuimaze.BaseAgent):
             if position == goal:                    # break the loop when the goal position is reached
                 print("goal reached")
                 break
-            self.environment.render()               # show enviroment's GUI       DO NOT FORGET TO COMMENT THIS LINE BEFORE FINAL SUBMISSION!      
-            time.sleep(0.1)                         # sleep for demonstartion     DO NOT FORGET TO COMMENT THIS LINE BEFORE FINAL SUBMISSION! 
+            #self.environment.render()               # show enviroment's GUI       DO NOT FORGET TO COMMENT THIS LINE BEFORE FINAL SUBMISSION!      
+            #time.sleep(0.1)                         # sleep for demonstartion     DO NOT FORGET TO COMMENT THIS LINE BEFORE FINAL SUBMISSION! 
 
         path = [(4,0),(4,1)]        # create path as list of tuples in format: [(x1, y1), (x2, y2), ... ] 
         return path
@@ -82,7 +82,7 @@ if __name__ == '__main__':
     env = kuimaze.InfEasyMaze(map_image=None, grad=GRAD)       # For using random map set: map_image=None
     agent = agen.Agent(env) 
 
-    path = agent.a_algorithm()
+    path = agent.find_path()
     time.sleep(3)
     print(path)
     env.set_path(path)          # set path it should go from the init state to the goal state
