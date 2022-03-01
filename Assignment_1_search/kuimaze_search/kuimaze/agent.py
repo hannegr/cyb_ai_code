@@ -21,15 +21,20 @@ class Agent(BaseAgent):
         dy = abs(position[1] - goal[1])
         return (dx + dy)    
     
-    def _f_score(self, goal, positions):
+    def _g_score(self, position, previous_position): 
+        position[1] = position[1] + previous_position[0][1]
+        return position[0][1]
+        
+    
+    def _f_score(self, goal, positions, prev_pos):
         """
         Used to find the f-score of the predecessor nodes. 
         """
         f_score_list = []
         for position in positions: 
             pos_h_score = self._h_score(position[0], goal)
-            pos_cost = position[1]
-            pos_f_score = pos_h_score + pos_cost
+            pos_g_score = self._g_score(position, prev_pos)
+            pos_f_score = pos_h_score + pos_g_score
             f_score_list.append([position, pos_f_score])
         return f_score_list 
     
@@ -62,10 +67,10 @@ class Agent(BaseAgent):
     
         Returns: path_list, list of the shortest path from start node to goal node. 
         '''
-        observation = self.environment.reset() #returns start position and goal position
+        observation = self.environment.reset()
         goal = observation[1][0:2] #goal position
-        start_pos = observation[0][0:2] #start position
-        q = [[start_pos], self._h_score(start_pos, goal)]
+        start_node = observation[0][0:2] #start position
+        q = [[start_node, 0], self._h_score(start_node, goal)]
         predecessor_dictionary = {}    
         path_list = []    
         frontier_list = [q]
@@ -75,18 +80,22 @@ class Agent(BaseAgent):
             frontier_list.sort(reverse=True)
             q = frontier_list.pop() 
             explored_set.add(q[0][0])
-            if(q[0][0] == goal): #goal was found, can therefore go out of the loop 
-                break  
-            else: 
-                q_successors = self.environment.expand(q[0][0])               
-                successors_with_f_values = self._f_score(goal, q_successors)
-                for successor in successors_with_f_values: 
-                    if(successor[0][0] not in explored_set and self._smallest_f_value(frontier_list, successor)): 
-                        frontier_list.append(successor)
-                        predecessor_dictionary[q[0][0]] = successor[0][0]
-                        
-        path_node = start_pos
+            if(successor[0][0] == goal): #goal was found, can therefore go out of the loop
+                break
+            q_successors = self.environment.expand(q[0][0])  
+            successors_with_f_values = self._f_score(goal, q_successors, q)
+            for successor in successors_with_f_values: 
+                if(successor[0][0] not in explored_set and self._smallest_f_value(frontier_list, successor)): 
+                    frontier_list.append(successor)
+                    predecessor_dictionary[q[0][0]] = successor[0][0]
+                    if(successor[0][0] == goal): #goal was found, can therefore go out of the loop
+                        break
+        if goal not in predecessor_dictionary.values(): 
+            return None
+        path_node = start_node
         while goal not in path_list: 
+            if path_node == None: 
+                return None
             path_list.append(path_node)
             path_node = predecessor_dictionary.get(path_node)
         return path_list
