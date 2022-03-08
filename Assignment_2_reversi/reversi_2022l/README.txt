@@ -1,31 +1,25 @@
-Dostali jste k dispozici dva nástroje, které Vám pomohou s odladěním finálního reversi hráče pro turnaj.
-Jsou to tyto dva moduly:
-* headless_reversi_creator.py	- zahraje reversi hru v command line
-* reversi_creator.py			- spustí GUI s možnosí hry dvou python hráčů proti sobě, python hráče proti Vám nebo dvou živých hráčů proti sobě
+python means python3
 
-Předpokládá se použití python verze 3 (je možné použít volání "python3 .." místo "python ..", např. "python3 headless_reversi_creator.py player").
-
+* headless_reversi_creator.py	- play the reversi game without GUI
+* reversi_creator.py		- run GUI where you can choose various players
 
 ** headless_reversi_creator **
 
-headless_reversi_creator přijímá 1-2 povinné argumenty, ve kterých můžete specifikovat hráče.
-Pokud nakopirujete svého hráče do složky k přiloženému kódu, můžete spustit hru Vašeho hráče proti sobě následovně:
+headless_reversi_creator accepts one or two compulsory parameters where you can specify the players. 
 
+in a terminal:
 >> python headless_reversi_creator.py player
 
-(Předpokládá se že váš hráč třídy MyPlayer je v souboru player.py)
-
+Expects MyPlayer class in player.py. 
+or
 >> python headless_reversi_creator.py player player
-bude mít stejný efekt.
-
-Nebo vytvořte hráčů více a nechte je hrát proti sobě:
+Will run your player againts itself. You can have more players. 
 
 >> python headless_reversi_creator.py player another_player
 
-(Předpokládá se že Váš další hráč třídy MyPlayer je v souboru another_player.py)
+Expects MyPlayer class in another_player.py
 
-Můžete samozřejmě také upravit headless_reversi_creator podle svého a hráče například přidat přímo.
-V takovém případě je potřeba přidat import vašeho hráče a pozměnit volání herního kontroléru nějak takto:
+You can also freely modify the source of the headless_reversi_creator if you prefer
 
 import player
 
@@ -42,15 +36,17 @@ import player
 
 
 ** reversi_creator **
+You can run the interactive version of the game by
 
-reversi_creator přijímá povinné argumenty, ve kterých můžete specifikovat další hráče.
-Pokud nakopirujete své hráče do složky k přiloženému kódu, můžete je přidat do výběru.
+>> python reversi_creator.py player
 
->> python reversi_creator.py player another_player
+Expects MyPlayer class in player.py.
 
-Takový příkaz přidá hráče player a another_player do menu, ze kterého můžete vybírat.
-Opět můžete upravit reversi_creator podle svého a hráče přidat přímo.
-V takovém případě je potřeba přidat import vašeho hráče a do dictionary přidat další hráče.
+Similarly to the non-gui version you can specify alternative players
+
+>> python reversi_creator.py player another_player yet_another_player
+
+Again, you can modify the source of he reversi_creator if you wish
 
 import player
 
