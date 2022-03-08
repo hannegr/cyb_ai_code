@@ -2,6 +2,7 @@ from kuimaze.baseagent import BaseAgent
 import random 
 import time
 import kuimaze
+import numpy as np
 
 
 
@@ -14,22 +15,40 @@ class Agent(BaseAgent):
     
     def _h_score(self, position, goal): 
         """
-        Chooses the Manhattan distance as my heuristic distance, because of how the maze looks like (because we have 8 
-        neighbours). 
+        Returns the heuristic distance of a position, the h score, here chosen as the euclidian distance. 
+        Input:
+            position: The position we want to find the heuristic distance of. 
+            goal: The end position. 
+        Output:
+            dx + dy: The euclidian distance between position and goal
         """
-        dx = abs(position[0] - goal[0])
-        dy = abs(position[1] - goal[1])
-        return (dx + dy)    
+        dx = pow(abs(position[0] - goal[0]),2)
+        dy = pow(abs(position[1] - goal[1]),2)
+        return np.sqrt(dx + dy)    
     
-    def _g_score(self, position, previous_position): 
+    def _g_score(self, position, previous_position):
+        """
+        Returns the sum of the g score from the start position to the current position. 
+        Input:
+            position: The position we want to find the g score of
+            previous_position: The previous position 
+        Output:
+            position[0][1]: the new g score of position
+        """ 
         position[1] = position[1] + previous_position[0][1]
         return position[0][1]
         
     
     def _f_score(self, goal, positions, prev_pos):
         """
-        Used to find the f-score of the predecessor nodes. 
-        """
+        Returns the f score of a list of positions, by summing their h score and g score.
+        Input:
+            positions: The positions we want to find the f scores of
+            prev_pos: The previous position
+            goal: the end position
+        Output:
+            f_score_list: a list of the positions with their f scores
+        """ 
         f_score_list = []
         for position in positions: 
             pos_h_score = self._h_score(position[0], goal)
@@ -39,17 +58,21 @@ class Agent(BaseAgent):
         return f_score_list 
     
             
-    def _smallest_f_value(self, frontier_list, successor_place): 
+    def _smallest_f_value(self, frontier_list, frontier): 
         """
-        A helping function for find_path. Is used to find out if the position is already in the explore_list with a 
-        smaller value than the new explored version of it. 
-        
-        """
-        same_place_successors = [successor_place]
+        Returns the smallest f score given in the list frontier_list. Is used to find out if the position is already 
+        in the explore list with a smaller value than the new explored version of it.  
+        Input:
+            frontier_list: list of every frontier. 
+            frontier: The frontier we want to check if has the smallest f score in its position
+        Output:
+            True if frontier had the smallest f score in its position, if not False
+        """ 
+        same_place_frontiers = [frontier]
         for successor in frontier_list: 
-            if successor_place[0][0] in successor: 
-                same_place_successors.append(successor)
-        if min(same_place_successors) != successor_place: 
+            if frontier[0][0] in successor: 
+                same_place_frontiers.append(successor)
+        if min(same_place_frontiers) != frontier: 
             return False
         return True
             
@@ -58,44 +81,45 @@ class Agent(BaseAgent):
     
     def find_path(self):
         '''
-        Implemented A* algorithm. Contains 
-        - frontier_list: list showing the neighbournodes that may be expanded if the cost is minimal. 
-        - closed_set: a set s.t the values are not repeated. Includes every node that is finished. 
-        - predecessor_dictionary: a dictionary containing predecessor of nodes, used for returning the shortest path. 
-          Chose to do this, due to what was written on the wikipedia-page of the A* algorithm about it returning the 
-          shortest path, but not the way to get there. 
-    
-        Returns: path_list, list of the shortest path from start node to goal node. 
+        Implemented A* algorithm. Returns the optimal path from a start position to goal. 
+        Contains 
+        - frontiers: list showing the neighbours of the explored nodes
+        - explored: a set of already explored nodes
+        - predecessors_and_children: a dictionary containing predecessor of nodes, used for returning the shortest path. 
+        Output: path, list of the shortest path from start node to goal node. 
         '''
         observation = self.environment.reset()
         goal = observation[1][0:2] #goal position
-        start_node = observation[0][0:2] #start position
-        q = [[start_node, 0], self._h_score(start_node, goal)]
-        predecessor_dictionary = {}    
-        path_list = []    
-        frontier_list = [q]
-        explored_set = set()
+        start = observation[0][0:2] #start position
+        current = [[start, 0], self._h_score(start, goal)]
+        predecessors_and_children = {}    
+        path = []    
+        frontiers = [current]
+        explored = set()
          
-        while frontier_list: 
-            frontier_list.sort(reverse=True)
-            q = frontier_list.pop() 
-            explored_set.add(q[0][0])
-            if(successor[0][0] == goal): #goal was found, can therefore go out of the loop
+        while frontiers: 
+            frontiers.sort(reverse=True) #make a priority queue
+            current = frontiers.pop() 
+            explored.add(current[0][0])
+            if(current[0][0] == goal): #goal was found, can therefore go out of the loop
                 break
-            q_successors = self.environment.expand(q[0][0])  
-            successors_with_f_values = self._f_score(goal, q_successors, q)
+            current_successors = self.environment.expand(current[0][0])  
+            successors_with_f_values = self._f_score(goal, current_successors, current)
             for successor in successors_with_f_values: 
-                if(successor[0][0] not in explored_set and self._smallest_f_value(frontier_list, successor)): 
-                    frontier_list.append(successor)
-                    predecessor_dictionary[q[0][0]] = successor[0][0]
-                    if(successor[0][0] == goal): #goal was found, can therefore go out of the loop
-                        break
-        if goal not in predecessor_dictionary.values(): 
+                if(successor[0][0] not in explored): 
+                    predecessors_and_children[current[0][0]] = successor[0][0]
+                    if(self._smallest_f_value(frontiers, successor)): 
+                        frontiers.append(successor)
+        if goal not in predecessors_and_children.values(): 
             return None
-        path_node = start_node
-        while goal not in path_list: 
+        path_node = start
+        while goal not in path: 
             if path_node == None: 
                 return None
-            path_list.append(path_node)
-            path_node = predecessor_dictionary.get(path_node)
-        return path_list
+            path.append(path_node)
+            path_node = predecessors_and_children.get(path_node)
+        return path
+        
+    
+    
+   
