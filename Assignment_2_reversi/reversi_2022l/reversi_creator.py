@@ -153,7 +153,7 @@ class ReversiCreator(object):
 
         current_player_oponent_color = self.get_opponent_player_color(self.current_player_color)
         if next_player_id == -1 and self.board.can_play( current_player_oponent_color) :
-            print("oponent player can play an current can not")
+            print("opponent player can play and current can not")
             self.change_player()
             next_player_id = current_player_oponent_color
 

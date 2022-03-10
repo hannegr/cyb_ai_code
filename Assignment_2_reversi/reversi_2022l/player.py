@@ -10,14 +10,24 @@ class MyPlayer():
         self.opponent_color = opponent_color
         self.board_size = board_size
         
+        self.search_depth = 8 
+        self.alpha = -1000
+        self.beta = 1000
+        self.board_copy = None
+        
 
     def move(self,board):
         # TODO: write you method
-        # you can implement auxiliary fucntions, of course
-        if(self.get_all_valid_moves == None): 
+        # you can implement auxiliary functions, of course
+        #if(board.get_all_valid_moves(self.my_color) == None):
+        if(self.get_all_valid_moves(board) == None): 
             return None 
+        self.board_copy = board.get_board_copy()
+        #search_tree = SearchTree()
+        #value = search_tree.max_value(board)
+        #return value
+        return self.get_all_valid_moves(board)[0]
         
-        return (2, 1)
 
     def __is_correct_move(self, move, board):
         dx = [-1, -1, -1, 0, 1, 1, 1, 0]
@@ -58,30 +68,90 @@ class MyPlayer():
             return None
         return valid_moves
     
-    class SearchTree(): 
-        def __init__(self): 
-            self.player_utilities = np.array([50, 10, 5, 2, -1, -25, -50])
-            self.opponent_utilities = -self.player_utilities
-            self.search_depth = 8 #for alpha/beta algorithm 
-            self.alpha = -1000
-            self.beta = 1000
+    def get_thought_out_valid_moves(self, state, player_color): 
+        self.board_copy[state[0]][state[1]] = player_color
+        valid_moves = self.get_all_valid_moves(self.board_copy)
+        return valid_moves 
+        
+        
+        
+        
+    
+    def eval(self,board,state): 
+        '''
+        print -eval to get the evaluation of the opposing player. 
+        '''
+        board_size = board.board_size -1
+        row_modulo = state[0]%board_size
+        column_modulo = state[1]%board_size
+        
+        #if the state is in a corner: 
+        if(row_modulo == 0 and column_modulo == 0):
+            return 50
+        #if player puts the disc at least 2 spaces away from both the horizontal wall and the vertical wall: 
+        if(row_modulo < (board_size -1) and column_modulo > 1): 
+            if(column_modulo < (board_size -1) and row_modulo > 1):
+                return 10
+        #if the state is one diagonal away from a corner: 
+        if(row_modulo == 1 or row_modulo == board_size-1): 
+            if(column_modulo == 1 or column_modulo == board_size-1): 
+                return -50
+        #if the state is one point in the vertical or horizontal space away from the corner: 
+        if(row_modulo == 0 and (column_modulo == 1 or column_modulo == (board_size -1))): 
+            return -25 
+        if(column_modulo == 0 and (row_modulo == 1 or row_modulo == (board_size -1))): 
+            return -25 
+        return -10
+    
+    def full_score(): 
+        '''
+        See what the full score of the evaluation is
+        '''
+        return None 
+    
+    def max_value(self, state, depth):
+        v = 1000000 
+        successors = self.get_thought_out_valid_moves(self, state, self.my_color)
+        move = (-1,-1)
+        for successor in successors: 
+            v = self.min_value(successor)
+            move = successor
+            if v >= self.beta: 
+                return v, move
+            self.alpha = max(self.alpha, v)
+        return v, move
+    
+    def min_value(self, state, depth): 
+        v = -1000000 
+        successors = self.get_thought_out_valid_moves(self, state, self.opponent_color)
+        move = (-1,-1)
+        for successor in successors: 
+            v = self.max_value(successor)
+            if v <= self.alpha: 
+                return v, move
+            self.beta = min(self.beta, v)
+        return v, move
         
 
+"""class SearchTree(): 
+    def __init__(self): 
+        #self.player_utilities = np.array([50, 10, 2, -25, -50])
+        #self.opponent_utilities = -self.player_utilities
+    
             
-    class Node(): 
-        def __init__(self, parent, depth):
-            self.parent = parent 
-            self.depth = depth 
-            self.cost = None 
-            
+class Node(): 
+    def __init__(self, parent, depth, state):
+        self.parent = parent 
+        self.depth = depth 
+        self.cost = None 
+        self.state = state
+"""           
 if __name__ == "__main__": 
     board = GameBoard()
     board.print_board()
-    
     agent = MyPlayer(0,1)
-    #print(agent.move(board))
-    print(agent.get_all_valid_moves(board))
-    #moves = agent.get_all_valid_moves(board)
-        
+    print(agent.move(board))
+    state = (2,2)
+    
             
     
