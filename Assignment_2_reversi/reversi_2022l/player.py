@@ -1,5 +1,6 @@
 import numpy as np
 from game_board import GameBoard
+import copy
 
 class MyPlayer():
     '''My player is the best player and will win any tournament! Just wait!!!''' # TODO a short description of your player
@@ -10,7 +11,7 @@ class MyPlayer():
         self.opponent_color = opponent_color
         self.board_size = board_size
         
-        self.search_depth = 8 
+        self.search_depth = 6
         self.alpha = -1000
         self.beta = 1000
         self.board_copy = None
@@ -19,14 +20,15 @@ class MyPlayer():
     def move(self,board):
         # TODO: write you method
         # you can implement auxiliary functions, of course
-        #if(board.get_all_valid_moves(self.my_color) == None):
-        if(self.get_all_valid_moves(board) == None): 
+        valid_moves = self.get_all_valid_moves(board)
+        if(valid_moves == None): 
             return None 
-        self.board_copy = board.get_board_copy()
-        #search_tree = SearchTree()
-        #value = search_tree.max_value(board)
-        #return value
-        return self.get_all_valid_moves(board)[0]
+        if(len(valid_moves) == 1): 
+            return valid_moves[0]
+        self.board_copy = copy.deepcopy(board)
+        _, move = self.max_value(board, 0)
+        return move
+        #return self.get_all_valid_moves(board)[0]
         
 
     def __is_correct_move(self, move, board):
@@ -88,7 +90,7 @@ class MyPlayer():
         #if the state is in a corner: 
         if(row_modulo == 0 and column_modulo == 0):
             return 50
-        #if player puts the disc at least 2 spaces away from both the horizontal wall and the vertical wall: 
+        #if player puts the disc at least 2 spaces away from both the horizontal and vertical wall: 
         if(row_modulo < (board_size -1) and column_modulo > 1): 
             if(column_modulo < (board_size -1) and row_modulo > 1):
                 return 10
@@ -103,19 +105,22 @@ class MyPlayer():
             return -25 
         return -10
     
-    def full_score(): 
-        '''
-        See what the full score of the evaluation is
-        '''
-        return None 
-    
     def max_value(self, state, depth):
         v = 1000000 
-        successors = self.get_thought_out_valid_moves(self, state, self.my_color)
+        if depth == 0: 
+            successors = self.get_all_valid_moves(self.board_copy)
+        else: 
+            successors = self.get_thought_out_valid_moves(state, self.opponent_color)
         move = (-1,-1)
+        depth = depth + 1 
+        if successors == None: 
+            return 0, state
         for successor in successors: 
-            v = self.min_value(successor)
+            v = self.min_value(successor, depth)[0]
             move = successor
+            print(v)
+            print(self.beta)
+            
             if v >= self.beta: 
                 return v, move
             self.alpha = max(self.alpha, v)
@@ -123,29 +128,41 @@ class MyPlayer():
     
     def min_value(self, state, depth): 
         v = -1000000 
-        successors = self.get_thought_out_valid_moves(self, state, self.opponent_color)
+        successors = self.get_thought_out_valid_moves(state, self.opponent_color)
         move = (-1,-1)
+        depth = depth + 1 
+        if successors == None: 
+            return 0, state
         for successor in successors: 
-            v = self.max_value(successor)
+            v = self.max_value(successor, depth)[0]
             if v <= self.alpha: 
                 return v, move
             self.beta = min(self.beta, v)
         return v, move
-        
-
-"""class SearchTree(): 
-    def __init__(self): 
-        #self.player_utilities = np.array([50, 10, 2, -25, -50])
-        #self.opponent_utilities = -self.player_utilities
+    def is_cutoff(self, depth): 
+        if (depth >= 6): 
+            return True 
+        return False
     
-            
 class Node(): 
     def __init__(self, parent, depth, state):
         self.parent = parent 
         self.depth = depth 
         self.cost = None 
         self.state = state
-"""           
+    
+    def find_node_utilities(self, agent, board): 
+        node_utilities = 0 
+        while(self.parent != None):
+            if(self.depth%2 == 0):
+                node_utilities = node_utilities + agent.eval(board, self.state)
+            else: 
+                node_utilities = node_utilities - agent.eval(board, self.state)   
+            self.node = self.parent
+        return node_utilities  
+ 
+ 
+      
 if __name__ == "__main__": 
     board = GameBoard()
     board.print_board()
@@ -153,5 +170,22 @@ if __name__ == "__main__":
     print(agent.move(board))
     state = (2,2)
     
+    
+    
+    
+    
+    
+    
+    
+
+"""class SearchTree(): 
+    def __init__(self): 
+        #self.player_utilities = np.array([50, 10, 2, -25, -50])
+        #self.opponent_utilities = -self.player_utilities
+    
+            
+
+        
+"""     
             
     
