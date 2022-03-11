@@ -66,22 +66,20 @@ class MyPlayer():
                     valid_moves.append( (x, y) )
 
         if len(valid_moves) <= 0:
-            print('No possible move!')
+            #print('No possible move!')
             return None
         return valid_moves
     
     def get_thought_out_valid_moves(self, state, player_color): 
         self.board_copy[state[0]][state[1]] = player_color
+        #print("state: ", state)
         valid_moves = self.get_all_valid_moves(self.board_copy)
-        return valid_moves 
-        
-        
-        
-        
+        #print("valid moves: ", valid_moves)
+        return valid_moves  
     
     def eval(self,board,state): 
         '''
-        print -eval to get the evaluation of the opposing player. 
+        -eval to get the evaluation of the opposing player. 
         '''
         board_size = board.board_size -1
         row_modulo = state[0]%board_size
@@ -106,7 +104,8 @@ class MyPlayer():
         return -10
     
     def max_value(self, state, depth):
-        v = 1000000 
+        print("depth: ", depth)
+        v = -1000000 
         if depth == 0: 
             successors = self.get_all_valid_moves(self.board_copy)
         else: 
@@ -118,16 +117,16 @@ class MyPlayer():
         for successor in successors: 
             v = self.min_value(successor, depth)[0]
             move = successor
-            print(v)
-            print(self.beta)
-            
             if v >= self.beta: 
                 return v, move
             self.alpha = max(self.alpha, v)
+        print("alpha: ", self.alpha)
+        print("v: ", v)
         return v, move
     
     def min_value(self, state, depth): 
-        v = -1000000 
+        print("depth:", depth)
+        v = 1000000 
         successors = self.get_thought_out_valid_moves(state, self.opponent_color)
         move = (-1,-1)
         depth = depth + 1 
@@ -138,11 +137,19 @@ class MyPlayer():
             if v <= self.alpha: 
                 return v, move
             self.beta = min(self.beta, v)
+        print("beta: ", self.beta)
+        print("v: ", v)
         return v, move
+    
     def is_cutoff(self, depth): 
         if (depth >= 6): 
             return True 
         return False
+    def is_terminal(self): 
+        if(self.get_all_valid_moves(self.board_copy)):
+            return None 
+        return None
+        
     
 class Node(): 
     def __init__(self, parent, depth, state):
