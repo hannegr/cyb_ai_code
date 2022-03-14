@@ -9,6 +9,7 @@ import time
 import getopt
 import sys
 import player_creator
+import player
 
 BOARD_SIZE = 8
 MAX_TIME_FOR_MOVE = 5
@@ -221,7 +222,10 @@ if __name__ == "__main__":
     (choices,args) = getopt.getopt(sys.argv[1:],"")
     #players_dict = {'random':random_player.MyPlayer}
     #players_dict = {'random':random_player.MyPlayer,'greedy':greedy_player.MyPlayer,'alphabeta':alphabeta_player.MyPlayer,'heuristic':heuristic_player.MyPlayer}
-    players_dict = {}
+    players_dict = {'new_player':player.NewPlayer, 'my_player':player.MyPlayer}
+    game = ReversiCreator(players_dict)
+    game.gui.root.mainloop()
+    """players_dict = {}
     for arg in args:
         to_import = arg
         if ".py" in arg:
@@ -236,3 +240,4 @@ if __name__ == "__main__":
 
     game = ReversiCreator(players_dict)
     game.gui.root.mainloop()
+    """
