@@ -115,10 +115,12 @@ class ReversiCreator(object):
                 print("running too long - killing it")
                 player_move_overtime = self.current_player_color
             
-            if player_move_overtime != -1:
-                inform_str = 'Player %d move took to long - killed' % (self.current_player_color)
-                self.gui.inform(inform_str, 'red')
-                break
+            
+            #TODO ADD THIS BACK SHOULD BE IN CODE 
+            #if player_move_overtime != -1:
+            #    inform_str = 'Player %d move took to long - killed' % (self.current_player_color)
+            #    self.gui.inform(inform_str, 'red')
+            #    break
             
             self.max_times_ms[self.current_player_color] = max(self.max_times_ms[self.current_player_color], move_time)
             if move is None:
@@ -222,7 +224,7 @@ if __name__ == "__main__":
     (choices,args) = getopt.getopt(sys.argv[1:],"")
     #players_dict = {'random':random_player.MyPlayer}
     #players_dict = {'random':random_player.MyPlayer,'greedy':greedy_player.MyPlayer,'alphabeta':alphabeta_player.MyPlayer,'heuristic':heuristic_player.MyPlayer}
-    players_dict = {'new_player':player.NewPlayer, 'my_player':player.MyPlayer}
+    players_dict = {'loser_player':player.LoserPlayer, 'my_player':player.MyPlayer, 'random_player': player.RandomPlayer, 'best_player': player.BestPlayer}
     game = ReversiCreator(players_dict)
     game.gui.root.mainloop()
     """players_dict = {}
