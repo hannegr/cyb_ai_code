@@ -224,7 +224,7 @@ if __name__ == "__main__":
     (choices,args) = getopt.getopt(sys.argv[1:],"")
     #players_dict = {'random':random_player.MyPlayer}
     #players_dict = {'random':random_player.MyPlayer,'greedy':greedy_player.MyPlayer,'alphabeta':alphabeta_player.MyPlayer,'heuristic':heuristic_player.MyPlayer}
-    players_dict = {'loser_player':player.LoserPlayer, 'my_player':player.MyPlayer, 'random_player': player.RandomPlayer, 'best_player': player.BestPlayer}
+    players_dict = {'loser_player':player.LoserPlayer, 'my_player':player.MyPlayer, 'random_player': player.RandomPlayer, 'best_player': player.BestPlayer, "test_player": player.TestPlayer}
     game = ReversiCreator(players_dict)
     game.gui.root.mainloop()
     """players_dict = {}
