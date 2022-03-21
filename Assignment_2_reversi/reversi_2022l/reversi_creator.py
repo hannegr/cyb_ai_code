@@ -11,7 +11,7 @@ import sys
 import player_creator
 import player
 
-BOARD_SIZE = 8
+BOARD_SIZE = 6
 MAX_TIME_FOR_MOVE = 5
 
 class ReversiCreator(object):
@@ -224,7 +224,7 @@ if __name__ == "__main__":
     (choices,args) = getopt.getopt(sys.argv[1:],"")
     #players_dict = {'random':random_player.MyPlayer}
     #players_dict = {'random':random_player.MyPlayer,'greedy':greedy_player.MyPlayer,'alphabeta':alphabeta_player.MyPlayer,'heuristic':heuristic_player.MyPlayer}
-    players_dict = {'loser_player':player.LoserPlayer, 'my_player':player.MyPlayer, 'random_player': player.RandomPlayer, 'best_player': player.BestPlayer, "test_player": player.TestPlayer}
+    players_dict = {'loser_player':player.LoserPlayer, 'my_player':player.MyPlayer, 'random_player': player.RandomPlayer, 'best_player': player.BestPlayer, "test_player": player.TestPlayer, "false_player": player.FalsePlayer}
     game = ReversiCreator(players_dict)
     game.gui.root.mainloop()
     """players_dict = {}

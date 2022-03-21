@@ -18,7 +18,7 @@ class ReversiView:
     Creates window with the reversi board and controls the game using gui.
     '''
 
-    def __init__(self, players, boardSize=8, w=850, h=410):
+    def __init__(self, players, boardSize=10, w=850, h=500):
         '''
         :param w: width of the window
         :param h: height of the window
