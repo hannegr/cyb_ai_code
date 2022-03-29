@@ -1,5 +1,4 @@
 from cmath import inf
-import collections
 import random
 import numpy as np 
 
@@ -13,6 +12,7 @@ def find_policy_via_value_iteration(problem, discount_factor, epsilon):
     value = 0.0
     all_states = problem.get_all_states()
     value_list = [] 
+    threshold = epsilon*(1-discount_factor)*discount_factor
     
     for state_index in range(len(all_states)): 
         value_list.append([all_states[state_index], None, value, value])        
@@ -22,11 +22,10 @@ def find_policy_via_value_iteration(problem, discount_factor, epsilon):
             reward = value_list[state_value_index][0][2]
             updated_value_list = sum_probability_values(problem, state_value_index, value_list)
             new_state_value = reward + discount_factor*updated_value_list
-            value_difference = value_list[state_value_index][3] - new_state_value #abs(value_list[state_value_index][3] - new_state_value)
-            if(value_difference > delta): 
-                delta = value_difference
+            value_difference = new_state_value- value_list[state_value_index][3]  #abs(value_list[state_value_index][3] - new_state_value)
+            delta = max(value_difference, delta)
             value_list[state_value_index][3] = new_state_value
-        if delta <= (epsilon*(1-discount_factor)*discount_factor): 
+        if delta <= threshold: 
             break   
     return turn_list_into_dictionary(value_list)
 
