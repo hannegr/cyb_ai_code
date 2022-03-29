@@ -5,6 +5,7 @@ import random
 import os
 import time
 import sys
+import kuimaze.mdp_agent as mdp_ag
 
 
 MAP = 'maps/easy/easy1.bmp'
@@ -129,9 +130,11 @@ if __name__ == "__main__":
     print('press s - skip to end')
     print('====================')
 
-    print(env.get_all_states())
+    policy = (mdp_ag.find_policy_via_value_iteration(env, 0.7, 0.005))
+    print(policy)
+    #print(env.get_all_states())
     # policy1 = find_policy_via_value_iteration(env)
-    policy = find_policy_via_policy_iteration(env,0.9999)
+    #policy = find_policy_via_policy_iteration(env,0.9999)
     env.visualise(get_visualisation_values(policy))
     env.render()
     wait_n_or_s()
