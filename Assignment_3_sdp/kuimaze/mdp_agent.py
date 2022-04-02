@@ -1,8 +1,10 @@
 from cmath import inf
 import random
 import numpy as np 
-
 import kuimaze.maze
+import itertools
+import copy 
+import time 
 
 
 def find_policy_via_value_iteration(problem, discount_factor, epsilon): 
@@ -12,44 +14,38 @@ def find_policy_via_value_iteration(problem, discount_factor, epsilon):
     value = 0.0
     all_states = problem.get_all_states()
     value_list = [] 
+    for state in all_states: 
+        value_list.append([state, None,value])
     threshold = epsilon*(1-discount_factor)*discount_factor
-    
-    for state_index in range(len(all_states)): 
-        value_list.append([all_states[state_index], None, value, value])        
+    start_time = time.time()
     while True:
         delta = 0.0
         for state_value_index in range(len(value_list)): 
-            reward = value_list[state_value_index][0][2]
-            updated_value_list = sum_probability_values(problem, state_value_index, value_list)
-            new_state_value = reward + discount_factor*updated_value_list
-            value_difference = new_state_value- value_list[state_value_index][3]  #abs(value_list[state_value_index][3] - new_state_value)
-            delta = max(value_difference, delta)
-            value_list[state_value_index][3] = new_state_value
-        if delta <= threshold: 
+            old_max_value = value_list[state_value_index][2]
+            #updated_max_value = sum_probability_values(problem, state_value_index, value_list, discount_factor)
+            delta = max(sum_probability_values(problem, state_value_index, value_list, discount_factor) - old_max_value , delta)
+        if delta <= threshold or time.time() - start_time > 28: 
             break   
     return turn_list_into_dictionary(value_list)
 
-def sum_probability_values(problem, state_value_index, value_list):
+def sum_probability_values(problem, state_value_index, value_list, discount_factor):
     '''
     TODO write a description here. 
     '''
     max_value = -inf
+    max_action = None 
     all_actions = problem.get_actions(value_list[state_value_index][0])
     for action in all_actions: 
         sum_action_values = 0
         next_states_and_probs = problem.get_next_states_and_probs(value_list[state_value_index][0], action)
-        
-        for next_state in next_states_and_probs: 
-            for value in value_list: 
-                if value[0][0:2] in next_state:
-                    sum_action_values += value[3]*next_state[1]
-        
+        for next_state in next_states_and_probs:
+            sum_action_values += next(itertools.dropwhile(lambda value : value[0][0:2] != next_state[0][0:2], value_list))[2]*next_state[1] #even a little bit faster than previous one lol 
         if sum_action_values > max_value: 
             max_value = sum_action_values
-            value_list[state_value_index][2] = sum_action_values
-            value_list[state_value_index][1] = action
-            
-    return max_value
+            max_action = action
+    value_list[state_value_index][2] = value_list[state_value_index][0][2] + discount_factor*max_value
+    value_list[state_value_index][1] = max_action 
+    return value_list[state_value_index][2]
 
     
 
@@ -84,8 +80,7 @@ def find_policy_via_policy_iteration(problem, discount_factor):
             policy_evaluation(problem, policy_index, policy_list, discount_factor)
         for policy_index in range(len(policy_list)):
             better_action = better_max_action(problem, policy_index, policy_list)
-            if (better_action != None) and better_action != policy_list[policy_index][1]: #muligens heller sammenligne verdier her!!!
-                #better_max_action: return first the value of the maximum action, and then the best action as the second element! 
+            if (better_action != None) and better_action != policy_list[policy_index][1]:
                 policy_list[policy_index][1] = better_action
                 changed = True 
     return turn_list_into_dictionary(policy_list)
@@ -103,7 +98,6 @@ def policy_evaluation(problem, policy_list_index, policy_list, discount_factor):
                     policy_value += policy[2]*next_state[1]
     policy_value = policy_list[policy_list_index][0][2] + discount_factor*policy_value
     policy_list[policy_list_index][2] = policy_value
-    #return policy_value #do I even need to return anything here? 
 
 
 
