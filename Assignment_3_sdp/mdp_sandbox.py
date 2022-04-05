@@ -139,19 +139,15 @@ if __name__ == "__main__":
     executionTime = (time.time() - startTime)
     print("execution time policy iteration: ", executionTime)
     startTime = time.time()
-    policy3 = mdp_ag.find_policy_via_value_iteration1(env,0.8, 0)
-    executionTime = (time.time() - startTime)
-    print("execution time bad policy iteration: ", executionTime)
 
     startTime = time.time()
-    policy1 = mdp_ag.find_policy_via_value_iteration(env, 0.8, 0)
+    policy1 = mdp_ag.find_policy_via_value_iteration(env, 0.8, 0.001)
     
     executionTime = (time.time() - startTime)
     print("execution time value iteration: ", executionTime)
-    print("value it 1: ", policy1)
+    print("value it: ", policy1)
     print("policy it: ", policy2)
-    print("value it 2: ", policy3)
-    
+    """
     env.visualise(get_visualisation_values(policy1))
     env.render()
     wait_n_or_s()
@@ -159,5 +155,7 @@ if __name__ == "__main__":
     env.visualise(get_visualisation_values(utils))
     env.render()
     time.sleep(5)
+    """
+    
     
     
