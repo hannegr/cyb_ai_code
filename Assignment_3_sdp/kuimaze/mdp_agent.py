@@ -1,13 +1,13 @@
 from cmath import inf
 import random
 import numpy as np 
-import kuimaze.maze
+#import kuimaze.maze
 import itertools
-import copy 
+#import copy 
 import time 
 
 
-def find_policy_via_value_iteration(problem, discount_factor, epsilon): 
+def find_policy_via_value_iteration1(problem, discount_factor, epsilon): 
     '''
     TODO write a description here. 
     '''
@@ -119,3 +119,35 @@ def better_max_action(problem, policy_index, policy_list):
             max_value = sum_action_values
             best_action = action           
     return best_action
+
+def find_policy_via_value_iteration(problem, discount_factor, epsilon):
+    '''
+    TODO description here 
+    '''
+    state_reward_actions = {}
+    all_states = problem.get_all_states()
+    threshold = epsilon*(1-discount_factor)*discount_factor 
+    for state in all_states:
+        state_reward_actions[state[0:2]] = [0.0, None]
+    while True: 
+        delta = 0.0 
+        for state in all_states: 
+            max_action = None 
+            max_value = -inf
+            #test = (max([sum((probability*state_reward_actions[next_state[0:2]][0]) for next_state, probability in problem.get_next_states_and_probs(state, action))] for action in problem.get_actions(state)))[0]
+            for action in problem.get_actions(state): 
+                value = sum((probability*state_reward_actions[next_state[0:2]][0]) for next_state, probability in problem.get_next_states_and_probs(state, action))
+                if value > max_value: 
+                    max_value = value 
+                    max_action = action 
+            max_value = state[2] + discount_factor*max_value 
+            delta = max(delta, max_value - state_reward_actions[state[0:2]][0])
+            state_reward_actions[state[0:2]] = [max_value, max_action]
+        if(delta <= threshold):
+            break 
+    for state in state_reward_actions:
+        state_reward_actions[state] = state_reward_actions[state][1]
+    return  state_reward_actions                                                                                                      
+
+        
+        
