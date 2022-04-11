@@ -134,19 +134,22 @@ if __name__ == "__main__":
     #print(policy)
     #print(env.get_all_states())
     
-    startTime = time.time()
-    policy2 = mdp_ag.find_policy_via_policy_iteration(env,0.9)
-    executionTime = (time.time() - startTime)
-    print("execution time policy iteration: ", executionTime)
-    startTime = time.time()
+    
 
     startTime = time.time()
-    policy1 = mdp_ag.find_policy_via_value_iteration(env, 0.8, 0.001)
-    
+    policy1 = mdp_ag.find_policy_via_value_iteration(env, 0.5, 0.00)
     executionTime = (time.time() - startTime)
     print("execution time value iteration: ", executionTime)
+    startTime = time.time()
+    policy2 = mdp_ag.find_policy_via_policy_iteration(env, 0.5)
+    executionTime = (time.time() - startTime)
+    print("execution time policy iteration 2: ", executionTime)
+    
     print("value it: ", policy1)
+    print("")
     print("policy it: ", policy2)
+    
+    
     """
     env.visualise(get_visualisation_values(policy1))
     env.render()
@@ -156,6 +159,8 @@ if __name__ == "__main__":
     env.render()
     time.sleep(5)
     """
+    
+    
     
     
     

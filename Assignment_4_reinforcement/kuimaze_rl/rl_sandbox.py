@@ -155,10 +155,14 @@ if __name__ == "__main__":
         env.save_eps()
         '''
     policy = rl_agent.learn_policy(env)
-    #print(policy)
-    #env.visualise(get_visualisation(policy))
-    #env.render()
-    #wait_n_or_s()
+    print(policy)
+    policy2 = rl_agent.learn_policy2(env)
+    print(policy2)
+    '''
+    env.visualise(get_visualisation(policy2))
+    env.render()
+    wait_n_or_s()
 
-    #env.save_path()
-    #env.save_eps()
+    env.save_path()
+    env.save_eps()
+    '''
