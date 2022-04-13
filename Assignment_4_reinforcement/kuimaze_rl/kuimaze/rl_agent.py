@@ -71,8 +71,8 @@ def learn_policy(env):
     start_time = time.time()
     while True:
         #want to keep learning as long as possible, so check the time 
-        if(time.time() - start_time > 19.5): 
-            break 
+        #if(time.time() - start_time > 19.5): 
+        #    break 
         epsilon = 1
         alpha = 0.2
         number_of_iterations = 1
