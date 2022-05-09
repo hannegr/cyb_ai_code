@@ -1,5 +1,4 @@
 from PIL import Image
-import PIL
 import numpy as np 
 import os
 import random
@@ -29,8 +28,7 @@ def randomize(output_dict):
     d = dict(l)
     return d
     
-true_values_dict = get_true_output_training_sets(path_1)
-test_dict = randomize(true_values_dict)
+
 
 def get_files(path): 
     for fname in os.listdir(path):
@@ -46,9 +44,9 @@ def test_image_handling(image_path, true_values_dict):
         im2d = np.array(im)
         im1d = im2d.flatten()
         return im, im2d, im1d
-pil1 = test_image_handling("train_700_28", true_values_dict)
 
 def get_distance(picture_1, picture_2): 
+    #Her bør nok bildet endres litt før det kommer inn. Kanskje prøve å gjøre en slags max pooling først?
     
     im_1 = Image.open(picture_1)
     im_2 = Image.open(picture_2)
@@ -92,7 +90,7 @@ def k_NN_1_pic(training_dictionary, k, path):
 
 
 
-def k_NN_see(training_dictionary, k, path): 
+def k_NN_train(training_dictionary, k, path): 
     #noe galt her, men den over funker så se på den
     correct_value = 0 
     for test_pic in training_dictionary: 
@@ -113,17 +111,72 @@ def k_NN_see(training_dictionary, k, path):
         #training_dictionary[test_pic] = [training_dictionary[test_pic], most_likely_value]
     return correct_value/len(training_dictionary)  
     
-
-print(k_NN_see(test_dict, 3, "train_700_28"))          
-
-def k_NN_train(training_dictionary, k, path): 
     
     
-    return None  
 def k_NN_predict(): 
     return None 
 
+def classes_probabilities(training_dictionary): 
+    total_probs = dict(Counter(training_dictionary.values()))
+    total = sum(total_probs.values())
+    for key, item in total_probs.items(): 
+        total_probs[key] = item/total
+    return total_probs
+
+def minimize_pic(picture_1):
+    my_path = os.path.abspath(os.path.dirname(__file__))
+    path = os.path.join(my_path, picture_1)
+    im = np.array(Image.open(path))
+    flattened_im = im.flatten()
+    minimized_im = np.zeros(np.size(flattened_im)//4)
+    #intervals = [256*1/8, 256*2/8, 256*3/8, 256*4/8, 256*5/8, 256*6/8, 256*7/8]
+    for pixel in range(4,np.size(flattened_im),4): 
+        pixel_average = np.average(flattened_im[pixel-4:pixel+1])
+        pixel_feature = features_in_pic(pixel_average)
+        minimized_im[(pixel//4)-1] = pixel_feature #np.average(flattened_im[pixel-4:pixel+1])
+    return minimized_im
+    
+def features_in_pic(pixel_average): 
+    if(pixel_average < 256*1/8):
+        pixel_class = 1
+    elif pixel_average < 256*2/8:
+        pixel_class = 2
+    elif pixel_average < 256*3/8:
+        pixel_class = 3
+    elif pixel_average < 256*4/8:
+        pixel_class = 4
+    elif pixel_average < 256*5/8:
+        pixel_class = 5
+    elif pixel_average < 256*6/8:
+        pixel_class = 6
+    elif pixel_average < 256*7/8:
+        pixel_class = 7
+    else: 
+        pixel_class = 8  
+    return pixel_class
+    
+
+
+
 def naive_bayes_train(): 
+    """
+    1. Få dictionaryen fra treningssettet og finn ut hvor stor prosent de ulike typene er av den totale summen.
+        Kanskje bruk sett for å fikse? - DONE 
+    2. Fiks bildene ved feks bruk av max eller average pooling og gjør de mindre. De nye pikslene vil være featursene. - DONE
+    3. Finn et intervall mellom 0 og 255 som hver utgjør en feature. Du kan jo egt bare endre bildene akkurat som du vil, 
+        feks bare dele i sånn 8 klasser (ish 32 pikslelverdier på hver da) - DONE
+    4. Kanskje bare kalle hver piksel et tall mellom 1 og 8?  DONE
+    5. Gå gjennom bildene og finn sannsynlighet for at et feature er i et tall gitt at det tallet er et tall. Husk uavhengighet! 
+    """
     return None
 def naive_bayes_test(): 
     return None 
+
+
+if __name__ == '__main__':
+    true_values_dict = get_true_output_training_sets(path_1)
+    test_dict = randomize(true_values_dict)
+    test_count = classes_probabilities(test_dict)
+    print(minimize_pic("train_1000_10\\img_1112.png"))
+    print(test_count)
+    
