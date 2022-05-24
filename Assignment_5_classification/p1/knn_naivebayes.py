@@ -244,79 +244,17 @@ def naive_bayes_test(training_path, test_path, output_path, n):
             cond_prob_freq = []
             for pic_attribute_index in range(len(simplified_test_pic)): 
                 attribute = int(simplified_test_pic[pic_attribute_index]-1)
-                cond_prob_freq.append(cond_probs.item(pic_attribute_index, attribute))                   
-            log_probabilities[cond_key] = np.log(np.prod(cond_prob_freq)*trained_prior_probabilities[cond_key])    
+                cond_prob_freq.append(cond_probs.item(pic_attribute_index, attribute))
+            if(np.prod(cond_prob_freq) == float(0)): 
+                for cond_prob_freq_index in range(len(cond_prob_freq)):
+                    cond_prob_freq[cond_prob_freq_index]= cond_prob_freq[cond_prob_freq_index]*100                  
+                log_probabilities[cond_key] = np.log(np.prod(cond_prob_freq)*trained_prior_probabilities[cond_key]*100)
+            log_probabilities[cond_key] = np.log(np.prod(cond_prob_freq)*trained_prior_probabilities[cond_key])     
         max_key = max(log_probabilities, key = log_probabilities.get)        
         test_dict_simplified[pic_name] = max_key
     get_test_dsv_file(test_dict_simplified, output_path)
     return test_dict_simplified
     
-
-
-"""
-def naive_bayes_test(training_path, test_path, output_path, n): 
-    trained_prior_probabilities, trained_conditional_probabilities = naive_bayes_train(training_path, n)
-    test_dict = get_test_picture_names(test_path)
-    log_probabilities = {}
-    test_dict_simplified = get_simplified_pic_output_value(test_dict, test_path, True, n)[0]
-    frequency_count = np.zeros((n,))
-    for pic_name, simplified_test_pic in test_dict_simplified.items():
-        for attribute in range(n): 
-            frequency_count[attribute] = np.count_nonzero(simplified_test_pic == float(attribute+1))
-        for cond_key, cond_probs in trained_conditional_probabilities.items():
-            cond_prob_freq = []
-            for frequency_index in range(len(frequency_count)): 
-                if frequency_count[frequency_index] != 0: 
-                    cond_prob_freq.append(frequency_count[frequency_index]*cond_probs[frequency_index])                    
-            log_probabilities[cond_key] = np.log(np.prod(cond_prob_freq)*trained_prior_probabilities[cond_key])    
-        max_key = max(log_probabilities, key = log_probabilities.get)        
-        test_dict_simplified[pic_name] = max_key
-    get_test_dsv_file(test_dict_simplified, output_path)
-    return test_dict_simplified
-
-
-
-
-
-
-
-
-
-
-
-
-def naive_bayes_test(prior_probabilities, conditional_probabilities, test_dict):
-    
-    #datalist = np.zeros((len(conditional_probabilities),))
-    predict_dict = {}
-    log_probabilities = {}
-    #log_probabilities = np.zeros((len(conditional_probabilities),))
-    frequency_count = np.zeros((8,))
-    cond_prob_freq = np.zeros((8,))
-    for pic_class, pic_arrays in test_dict.items(): 
-        for pic_array in pic_arrays: 
-            for attribute in range(8):
-                frequency_count[attribute] = np.count_nonzero(pic_array == float(attribute))
-                if(frequency_count[attribute] == 0): 
-                    frequency_count[attribute] = 0.00001
-            for cond_key in conditional_probabilities: 
-                for frequency_index in range(len(frequency_count)): 
-                    cond_prob_freq[frequency_index] = conditional_probabilities[cond_key][frequency_index]*frequency_count[frequency_index]
-                log_probabilities[cond_key] = np.log(np.prod(cond_prob_freq)*prior_probabilities[cond_key])
-                #log_probabilities[cond_key] = np.log(np.prod(frequency_count)*np.prod(conditional_probabilities[cond_key])*prior_probabilities[cond_key])
-            #log_probabilities_list = zip(log_probabilities.keys(), log_probabilities.values()) 
-            #log_probabilities_list = list(log_probabilities_list)
-            #ab = log_probabilities_list[0][1]
-            #test = max(prob[1] for prob in log_probabilities_list)
-            
-            max_val = max(log_probabilities.values())
-            max_key = [pic_class for pic_class,log_probability in log_probabilities.items() if log_probability == max_val][0]
-            if(pic_class not in predict_dict): 
-                predict_dict[pic_class] = [max_key]
-            else: 
-                predict_dict[pic_class].append(max_key)
-    return predict_dict
-    """
 
 
 def knn_test(k, training_path, test_path, output_path, n): 
@@ -350,6 +288,9 @@ def knn_test(k, training_path, test_path, output_path, n):
              
 if __name__ == '__main__':
     
-    real_knn_test = knn_test(3, "train_train_700_28", "test_train_700_28", "test_out_knn.dsv", 12) 
-    nb_test = naive_bayes_test("train_train_700_28", "test_train_700_28", "test_out_nb.dsv", 12)
+    real_knn_test1 = knn_test(3, "train_train_700_28", "test_train_700_28", "test_out_knn.dsv", 12) 
+    nb_test1 = naive_bayes_test("train_train_700_28", "test_train_700_28", "test_out_nb.dsv", 12)
+
+    real_knn_test = knn_test(3, "train_1000_10", "test_1000_10", "test_out_knn2.dsv", 12) 
+    nb_test = naive_bayes_test("train_1000_10", "test_1000_10", "test_out_nb2.dsv", 12)
     a = 2
