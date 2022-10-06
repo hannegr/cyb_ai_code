@@ -1,0 +1,13 @@
+name: p1
+dependencies: 
+  - numpy 
+  - pandas 
+  - matplotlib
+  - pytorch 
+  - jupyter
+  - os
+  - random
+  - argparse 
+  - collections 
+  - PIL 
+  - itertools 
