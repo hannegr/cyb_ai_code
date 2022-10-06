@@ -136,6 +136,10 @@ def get_training_set_output(train_path):
         train_path: folder with training data
     Output: 
         training_data_dict: dictionary with a list of pictures as values and with the key as the true value for these. 
+        
+        
+    Denne funksjonen legger inn sanne verdi for bilder (feks 0, 1, 2,.. i mnist dataset) inn som key, og legger til
+    navene på alle treningsbild4ene som faktisk har denne verdien inn som value i dictionaryen. 
     """
     my_path = os.path.abspath(os.path.dirname(__file__))
     training_path = os.path.join(my_path, train_path)  
