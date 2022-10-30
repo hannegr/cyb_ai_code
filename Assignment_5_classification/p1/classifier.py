@@ -6,21 +6,6 @@ import random
 from collections import Counter
 from itertools import islice
 
-def get_test_picture_names(test_path): 
-    """
-    Finds the name of all of the pictures that are to be tested, and returns a dictionary with them as keys and '0' as value. 
-    Input: 
-        test_path: the path with the folder with the pictures that are to be predicted. 
-    Output: 
-        test_data_dict: dictionary with names of all of the test-pictures as keys 
-    """
-    my_path = os.path.abspath(os.path.dirname(__file__))
-    test_path = os.path.join(my_path, test_path)  
-    test_data_dict = {}    
-    for fname in os.listdir(test_path):
-        test_data_dict[fname] = '0'
-    return test_data_dict
-
 def get_distance(im1, im2):
     """
     Used to get the eucledian distance between two 
@@ -94,75 +79,70 @@ def features_in_pic(pixel_average, n):
             return pixel_class
     return n 
 
-def get_simplified_pic_output_value(pic_dictionary, path, test, n): 
+def get_simplified_pic_output_values(training_dict, path, n): 
     """
     Gets a dictionary, and gives out a dictionary containing simplified items corresponding 
     to the simplified versions of the pictures that were there previously. 
     
     Inputs: 
-        pic_dictionary: dictionary with items that are to be simplified to make them easier to work with 
+        training_dict: dictionary with training sets
         path: the path the images are from 
+        n: pixel resolution ish
     Output: 
-        pic_dictionary: the same dictionary, but simplified 
+        simplified_training_dict: training dictionary with simpler resolution
+        simplified_test_dict: test dictionary with simpler resolution
+        
+        simplified_test_dict: Navn på bilde som key, liste med piksel som item- 
+        simplified_training_dict: ground truth value som key, liste med lister med piksel som item
     """
-    simplified_dict = {}
-    for picture_key, picture_list in pic_dictionary.items():
-        if(test):
-            #if the pictures are to be minimized for a test, we want to add the minimized array as a value corresponding 
-            #to the picture name as a key in the dictionary 
-            picture, picture_width = get_image_proportions(path + "/" + picture_key) 
-            minimized_picture = minimize_2d_pic(picture, picture_width, n)
-            simplified_dict[picture_key] = minimized_picture
-            minimized_pic_length = len(minimized_picture)
-        else: 
-            #if the pictures are to be minimized for training, we want to add the minimized array as a value in the list, 
-            # where the corresponding key is the correct number or letter 
-            for picture_index in range(len(picture_list)): 
-                picture, picture_width = get_image_proportions(path + "/" + picture_list[picture_index])
-                minimized_picture = minimize_2d_pic(picture, picture_width, n)
-                if(picture_key not in simplified_dict): 
-                    simplified_dict[picture_key] = [minimized_picture]
-                else: 
-                    simplified_dict[picture_key].append(minimized_picture)
-                minimized_pic_length = len(minimized_picture)
-    return simplified_dict, minimized_pic_length
-
-def get_training_set_output(train_path): 
-    """
-    Finds the file with the true values of the numbers in the training-set, and adds the 
-    values as keys, and a list of picture names that correspond to this value as items. 
     
-    Input: 
-        train_path: folder with training data
-    Output: 
-        training_data_dict: dictionary with a list of pictures as values and with the key as the true value for these. 
-        
-        
-    Denne funksjonen legger inn sanne verdi for bilder (feks 0, 1, 2,.. i mnist dataset) inn som key, og legger til
-    navene på alle treningsbild4ene som faktisk har denne verdien inn som value i dictionaryen. 
+    simplified_training_dict, simplified_test_dict = {}, {}
+    for picture_key, picture_list in training_dict.items():
+        for picture_name in picture_list: 
+            picture, picture_width = get_image_proportions(path + "\\" + picture_name)
+            minimized_picture = minimize_2d_pic(picture, picture_width, n)
+            simplified_test_dict[picture_name] = minimized_picture
+            if(picture_key not in simplified_training_dict): 
+                    simplified_training_dict[picture_key] = [minimized_picture]
+            else: 
+                simplified_training_dict[picture_key].append(minimized_picture)
+            minimized_pic_length = len(minimized_picture)
+    return simplified_training_dict, simplified_test_dict, minimized_pic_length
+
+
+def get_training_and_test_set(train_path): 
     """
-    my_path = os.path.abspath(os.path.dirname(__file__))
-    training_path = os.path.join(my_path, train_path)  
-    training_data_dict = {}    
-    for fname in os.listdir(training_path):
-        if("truth.dsv" in fname): 
-            truth_path = os.path.join(training_path, "truth.dsv")
-            with open(truth_path) as f:
-                lines = f.readlines()
-                for line_index in range(len(lines)): 
-                    #Gives the name of the picture
-                    after_semicolon = lines[line_index].partition(":")[2]
-                    #Must partition again to remove \n
-                    pic_name = lines[line_index].partition(":")[0]
-                    #Gives the true value of the picture 
-                    pic_value = after_semicolon[0]
-                    if pic_value not in training_data_dict: 
-                        training_data_dict[pic_value] = [pic_name]
-                    else: 
-                        training_data_dict[pic_value].append(pic_name)      
-    return training_data_dict
+    Gets a path for where the training data is, and extracts the names of the images and the corresponding ground truth value. 
+    These are shuffled to not get biased data when splitting the data up in a training set and a validation set. 
+    splits the training data into 80% training and 20% validation. 
 
-
+    Inputs: 
+        train_path: relative path of where the training data is 
+    Output: 
+        validation_data: dictionary with data used for validation, giving the gorund truth value as the key and the 
+        corresponding image names as a list of every image which has the ground truth value. 
+        training_data: dictionary with data used for training, built up in the same way as validation_data
+        training_test_data: dictionary with image as key and 0 as value.
+    """
+    relative_path = os.path.abspath(os.path.dirname('__file__'))
+    train_path = os.path.join(relative_path, train_path)
+    validation_data, training_test_data, training_data = {}, {}, {}
+    with open(train_path + '\\truth.dsv', "r") as csv_file:
+        data = csv_file.readlines()
+    random.shuffle(data)
+    i = 0 
+    for pic in data: 
+        i += 1
+        if (i % 8 == 0): 
+            if(not pic.split(':')[1].strip('\n') in validation_data): 
+                validation_data[pic.split(':')[1].strip('\n')] = []
+            validation_data[pic.split(':')[1].strip('\n')].append(pic.split(':')[0])  
+        else: 
+            if(not pic.split(':')[1].strip('\n') in training_data): 
+                training_data[pic.split(':')[1].strip('\n')] = []
+            training_data[pic.split(':')[1].strip('\n')].append(pic.split(':')[0])
+            training_test_data[pic.split(':')[0]] = [0]
+    return training_data, validation_data, training_test_data
 
 def get_test_dsv_file(test_dictionary, output_path): 
     """
@@ -175,7 +155,7 @@ def get_test_dsv_file(test_dictionary, output_path):
         for pic_name, predicted_value in test_dictionary.items(): 
             tp.write("%s:%s\n" % (pic_name, predicted_value))
 
-def knn_test(k, training_path, test_path, output_path, n): 
+def knn_test(k, training_path, output_path, n): 
     """
     Basically runs the knn-algorithm on the data, and returns the predicted result in a dsv-file in the 
     output path. 
@@ -190,14 +170,13 @@ def knn_test(k, training_path, test_path, output_path, n):
         test_dict_simplified: dictionary with the predicted results. Does not really have to be here as the 
         results are in a dsv-file anyway, but nice for checking
     """
-    training_dict = get_training_set_output(training_path)
-    training_dict_simplified = get_simplified_pic_output_value(training_dict, training_path, False, n)[0]
-    test_dict = get_test_picture_names(test_path)
-    test_dict_simplified = get_simplified_pic_output_value(test_dict, test_path, True, n)[0]
+    training_dict, validation_set, training_test_dict = get_training_and_test_set(training_path)
+    training_dict_simplified, test_dict_simplified, _ = get_simplified_pic_output_values(training_dict, training_path, n)
     checked = False
-    for pic_name, simplified_test_pic in test_dict_simplified.items(): 
+    
+    for test_pic_name, simplified_test_pic in test_dict_simplified.items(): 
         k_most_likely = [np.inf for _ in range(k*2)]
-        for pic_id, simplified_pic_list in training_dict_simplified.items(): 
+        for ground_truth_value, simplified_pic_list in training_dict_simplified.items(): 
             for simplified_training_pic in simplified_pic_list: 
                 checked = False
                 eucledian_distance = get_distance(simplified_test_pic, simplified_training_pic)
@@ -205,8 +184,8 @@ def knn_test(k, training_path, test_path, output_path, n):
                     if(eucledian_distance < k_most_likely[kml_index] and not checked): 
                         checked = True
                         k_most_likely[kml_index] = eucledian_distance
-                        k_most_likely[kml_index+1] = pic_id
-        test_dict_simplified[pic_name] = get_most_likely_value(k_most_likely[1::2]) 
+                        k_most_likely[kml_index+1] = ground_truth_value
+        test_dict_simplified[test_pic_name] = get_most_likely_value(k_most_likely[1::2]) 
         get_test_dsv_file(test_dict_simplified, output_path)   
     return test_dict_simplified   
 
@@ -254,7 +233,7 @@ def find_conditional_probabilities(training_dict, minimized_pic_len, k, n):
         conditional_probability_dict[training_key] = attribute_occurence_list/sum_attributes
     return conditional_probability_dict  
 
-def naive_bayes_train(training_path, n): 
+def naive_bayes_train(training_dict_simplified, minimized_pic_len, n): 
     """
     Basically just uses the functions right above in order to train the Naive Bayes algorithm.
     Inputs: 
@@ -264,14 +243,12 @@ def naive_bayes_train(training_path, n):
         prior_probabilities: dictionary with a value as the key and the probabilities of a picture being that value as the values 
         conditional_probabilities: dictionary with a value as the key and the probabilities of it taking on different features on different pixels as the values
     """
-    training_dict = get_training_set_output(training_path)
-    training_dict_simplified, minimized_pic_len = get_simplified_pic_output_value(training_dict, training_path, False, n)
     prior_probabilities = classes_probabilities(training_dict_simplified)
     conditional_probabilities = find_conditional_probabilities(training_dict_simplified, minimized_pic_len, 3, n)
     return prior_probabilities, conditional_probabilities
 
 
-def naive_bayes_test(training_path, test_path, output_path, n): 
+def naive_bayes_test(training_path, output_path, n): 
     """
     Runs the Naive Bayes algorithm, that was given in the lecture in Cybernetics and AI. 
     Inputs: 
@@ -283,10 +260,10 @@ def naive_bayes_test(training_path, test_path, output_path, n):
         test_dict_simplified: dictionary with the predicted results. Does not really have to be here as the 
         results are in a dsv-file anyway, but nice for checking    
     """
-    trained_prior_probabilities, trained_conditional_probabilities = naive_bayes_train(training_path, n)
-    test_dict = get_test_picture_names(test_path)
+    training_dict, validation_set, test_dict = get_training_and_test_set(training_path)
+    training_dict_simplified, test_dict_simplified, minimized_pic_len = get_simplified_pic_output_values(training_dict, training_path, n)
+    trained_prior_probabilities, trained_conditional_probabilities = naive_bayes_train(training_dict_simplified, minimized_pic_len, n)
     log_probabilities = {}
-    test_dict_simplified = get_simplified_pic_output_value(test_dict, test_path, True, n)[0]
     for pic_name, simplified_test_pic in test_dict_simplified.items():
         for cond_key, cond_probs in trained_conditional_probabilities.items():
             cond_prob_freq = []
@@ -307,8 +284,6 @@ def naive_bayes_test(training_path, test_path, output_path, n):
 
 
 
-
-
 def setup_arg_parser():
     parser = argparse.ArgumentParser(description='Learn and classify image data.')
     parser.add_argument('train_path', type=str, help='path to the training data directory')
@@ -325,7 +300,9 @@ def setup_arg_parser():
 
 
 def main():
-    parser = setup_arg_parser()
+    #knn_test(4, 'p1\\train_1000_28', 'testing', 12)
+    #naive_bayes_test('p1\\train_1000_28', 'naive_bayes_testing', 12)
+    """parser = setup_arg_parser()
     args = parser.parse_args()
     
     print('Training data directory:', args.train_path)
@@ -337,7 +314,7 @@ def main():
         
     elif args.b:
         print("Running Naive Bayes classifier")
-        naive_bayes_test(args.train_path, args.test_path, args.o, 12)
+        naive_bayes_test(args.train_path, args.test_path, args.o, 12)"""
         
 if __name__ == "__main__":
     main()
