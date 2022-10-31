@@ -5,6 +5,7 @@ import os
 import random
 from collections import Counter
 from itertools import islice
+import torch
 
 def get_distance(im1, im2):
     """
@@ -282,6 +283,15 @@ def naive_bayes_test(training_path, output_path, n):
     return test_dict_simplified
 
 
+def torch_test(): 
+    a = torch.ones((4,3))
+    print(a)
+    b = torch.ones((2,4,4,3))
+    print(b) 
+    print(b.dim())
+    print(b.size())
+
+
 
 
 def setup_arg_parser():
@@ -300,6 +310,7 @@ def setup_arg_parser():
 
 
 def main():
+    torch_test()
     #knn_test(4, 'p1\\train_1000_28', 'testing', 12)
     #naive_bayes_test('p1\\train_1000_28', 'naive_bayes_testing', 12)
     """parser = setup_arg_parser()
