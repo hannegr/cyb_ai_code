@@ -310,8 +310,8 @@ def setup_arg_parser():
 
 
 def main():
-    torch_test()
-    #knn_test(4, 'p1\\train_1000_28', 'testing', 12)
+    #torch_test()
+    knn_test(4, 'train_1000_28', 'testing', 12)
     #naive_bayes_test('p1\\train_1000_28', 'naive_bayes_testing', 12)
     """parser = setup_arg_parser()
     args = parser.parse_args()
